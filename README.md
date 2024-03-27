@@ -12,4 +12,7 @@ pip install flask pymysql
 
 # run in terminal
 flask --app flaskapp run
+
+# Debug environment
+flask --app flaskapp run --debug
 ```
