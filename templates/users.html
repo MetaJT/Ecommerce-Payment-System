@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<html>
+    <head>
+        <title>Users List</title>
+    </head>
+
+    <body>
+        <h1>DB665 DB Project</h1>
+        <h2>Sign into your account by selecting your profile.</h2>
+
+
+        <button type="button" onclick="alert('Logged in as Alex Diaz!')">Alex Diaz</button>
+        <button type="button" onclick="alert('Logged in as Jordan Trotter!')">Jordan Trotter</button>
+        <button type="button" onclick="alert('Logged in as Barack Obama!')">Barack Obama</button>
+
+        <h3>Signed in as: </h3>
+
+        <h1>Buy Menu</h1>
+        <input type="button" value="Jordans">
+        <input type="button" value="Shirt">
+        <input type="button" value="Golf Shoes">
+
+
+        <h2>Users List</h2>
+        <table border="1">
+            <tr>
+                <th>UserID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Balance</th>
+                <th>Address</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.userid }}</td>
+                <td>{{ user.firstName }}</td>
+                <td>{{ user.lastName }}</td>
+                <td>{{ user.balance }}</td>
+                <td>{{ user.address }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
+
+
+<a href="/about">About</a>
