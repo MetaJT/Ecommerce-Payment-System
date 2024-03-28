@@ -3,19 +3,31 @@ import pymysql
 
 app = Flask(__name__)
 
-'''
 # Initialize MySQL
-db = pymysql.connect(
-    host='dbecommerce.c3okqegi6lyw.us-east-2.rds.amazonaws.com',
-    user='admin',
-    password='DBMS2024!',
-    database='ecommerceDB'
-)
-'''
+def get_db_connection():
+    return pymysql.connect(
+        host='dbecommerce.c3okqegi6lyw.us-east-2.rds.amazonaws.com',
+        user='admin',
+        password='DBMS2024!',
+        database='ecommerceDB',
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`users`;"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            for i in result:
+                print(i)
+    finally:
+        connection.close()
+
+    return render_template('users.html', users=result)
 
 @app.route('/about')
 def about():
