@@ -21,5 +21,9 @@ def index():
 def about():
     return render_template('about.html')
 
+@app.route('/payments')
+def payments():
+    return render_template('payments.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
