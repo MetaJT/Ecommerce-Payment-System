@@ -34,11 +34,11 @@
             </tr>
             {% for user in users %}
             <tr>
-                <td>{{ user.userid }}</td>
-                <td>{{ user.firstName }}</td>
-                <td>{{ user.lastName }}</td>
-                <td>{{ user.balance }}</td>
-                <td>{{ user.address }}</td>
+                <td>{{ user.UserID }}</td>
+                <td>{{ user.FirstName }}</td>
+                <td>{{ user.LastName }}</td>
+                <td>{{ user.Balance }}</td>
+                <td>{{ user.Address }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -47,3 +47,4 @@
 
 
 <a href="/about">About</a>
+<a href="/create_account">Create Account</a>

@@ -1,8 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, flash, url_for, redirect
 import pymysql
-from rds_db import AWSRDSDatabase
+from schema import create_queries
 
 app = Flask(__name__)
+app.secret_key = 'key'
 
 # Initialize MySQL
 def get_db_connection():
@@ -14,21 +15,35 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.route('/')
-def index():
-    connection = get_db_connection()
+# Create Tables
+def create_tables(sql_file):
     try:
+        connection = get_db_connection()
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`users`;"
+            for query in create_queries:
+                cursor.execute(query)       
+        connection.commit()
+    finally:
+        connection.close()
+
+# create_tables('schema.py')
+
+@app.route('/')
+@app.route('/home')
+@app.route('/index')
+def index():
+    create_tables('schema.py')
+    try:
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`Users`;" # using Users table instead of users
             cursor.execute(sql)
             result = cursor.fetchall()
-
             for i in result:
                 print(i)
     finally:
         connection.close()
-
-    return render_template('users.html', users=result)
+    return render_template('Users.html', users=result)
 
 @app.route('/about')
 def about():
@@ -38,14 +53,28 @@ def about():
 def payments():
     return render_template('payments.html')
 
+@app.route('/create_account', methods=['GET', 'POST'])
+def create_account():
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        username = request.form['username']
+        email = request.form['email']
+        # password = request.form['password']
+
+        try:
+            connection = get_db_connection()
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO ecommerceDB.Users (FirstName, LastName, Username, Email) VALUES (%s, %s, %s, %s)" # Need to add password
+                cursor.execute(sql, (first_name, last_name, username, email))
+                connection.commit()
+                print("Successfully created user.")
+        except Exception as e:
+            print(f"Error creating user: {str(e)}")
+        finally:
+            connection.close()
+        return redirect(url_for('index')) # Send user back to home page
+    return render_template('create_account.html')
+
 if __name__ == '__main__':
-    db = AWSRDSDatabase(
-        host='dbecommerce.c3okqegi6lyw.us-east-2.rds.amazonaws.com',
-        user='admin',
-        password='DBMS2024!',
-        database='ecommerceDB'
-        
-    )
-    sql_file_path = 'schema.sql'
-    db.execute_script(sql_file_path)
     app.run(debug=True)
