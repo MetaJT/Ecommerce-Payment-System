@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 <html>
 <head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Log into your account</h1>
-    {% for user_name in user_names %}
-        <button>{{ user_name.firstName }}</button>
-    {% endfor %}
-    <h2>Select your name to add funds to your account</h2>
+    <div> 
+        <h1>Log into your account</h1>
+    </div>
+    <div>
+        <span>
+            Select Account: 
+            {% for user_name in user_names %}
+            <button type="button" id="{{ user_name.firstName }}">
+            {{ user_name.firstName }}
+            </button>
+            {% endfor %}        
+        </span>
+    </div>
+    <div>
+        <h3>Signed in as: 
+            <!-- "user" stores all of user info -->
+            <span type="text" id="user"> 
+                {{ FirstName }}
+            </span>
+        </h3>
+    </div>
+    <div>
+        <a href="/home">Cancel</a>
+    </div>
+    <div>
+        <h2>Select your name to add funds to your account</h2>
+    </div>
 </body>
+<script src="{{ url_for('static', filename='loginscript.js') }}"></script>
 </html>

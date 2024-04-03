@@ -26,8 +26,6 @@ def create_tables(sql_file):
     finally:
         connection.close()
 
-# create_tables('schema.py')
-
 @app.route('/')
 @app.route('/home')
 @app.route('/index')
@@ -55,10 +53,29 @@ def get_user_names():
     connection.close()
     return user_names
 
+# This route is used for the js request, not ideal to keep
+# Will try and do something with this
+@app.route('/login-user', methods=['GET',])
+def login_user():
+    userID = request.args.get('userID', default='1')
+    try:
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
+            cursor.execute(sql, (userID,))
+            result = cursor.fetchone()
+            if result:
+                return jsonify({'status': 'success', 'user': result})
+            else:
+                return jsonify({'status': 'failed'})
+    finally:
+        connection.close()
+
 @app.route('/login')
 def login():
     user_names = get_user_names()
     return render_template('login.html', user_names=user_names)
+    
 
 @app.route('/about')
 def about():
