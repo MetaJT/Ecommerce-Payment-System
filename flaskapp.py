@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, url_for, redirect
+from flask import Flask, render_template, request, flash, url_for, redirect, request, jsonify
 import pymysql
 from schema import create_queries
 
@@ -31,6 +31,7 @@ def create_tables(sql_file):
 @app.route('/')
 @app.route('/home')
 @app.route('/index')
+
 def index():
     create_tables('schema.py')
     try:
@@ -44,6 +45,20 @@ def index():
     finally:
         connection.close()
     return render_template('Users.html', users=result)
+
+def get_user_names():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute('SELECT firstName FROM `ecommerceDB`.`Users`;')
+    user_names = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return user_names
+
+@app.route('/login')
+def login():
+    user_names = get_user_names()
+    return render_template('login.html', user_names=user_names)
 
 @app.route('/about')
 def about():
