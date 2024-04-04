@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Users (
     Username VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL,
     Address VARCHAR(255),
-    Password VARCHAR(255),
+    Password VARCHAR(255) DEFAULT '111',
     PaymentInfo VARCHAR(255),
-    Balance DECIMAL(19,4),
+    Balance DECIMAL(10,2) DEFAULT 0.00,
     PRIMARY KEY(UserID)
 );
 ''',
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Invoices (
     UserID INT NOT NULL, 
     ClientName VARCHAR(255),
     InvoiceDate DATE,
-    TotalAmount DECIMAL(19,4),
+    TotalAmount DECIMAL(10,2) DEFAULT 0.00,
     PRIMARY KEY(InvoicesID)
 );
 ''',
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.InvoiceItems (
     ItemID INT NOT NULL AUTO_INCREMENT,
     InvoiceID INT NOT NULL,
     ItemDescription VARCHAR(255),
-    Quantity INT,
-    LineTotal DECIMAL(19,4),
+    Quantity INT DEFAULT 0,
+    LineTotal DECIMAL(10,2) DEFAULT 0.00,
     PRIMARY KEY(ItemID)
 );
 ''',
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Payments (
     PaymentID INT NOT NULL AUTO_INCREMENT,
     InvoiceID INT NOT NULL,
     PaymentDate DATE,
-    Amount DECIMAL(19,4),
+    Amount DECIMAL(10,2) DEFAULT 0.00,
     PaymentMethod VARCHAR(255),
     PRIMARY KEY(PaymentID)
 );

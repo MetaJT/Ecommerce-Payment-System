@@ -163,16 +163,24 @@ def create_account():
         try:
             connection = get_db_connection()
             with connection.cursor() as cursor:
-                sql = "INSERT INTO ecommerceDB.Users (FirstName, LastName, Username, Email, Password) VALUES %s" # Need to add password
+                sql = "INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) VALUES (%s, %s, %s, %s, %s)" # Need to add password
                 cursor.execute(sql, (first_name, last_name, username, email, password))
-                connection.commit()
                 print("Successfully created user.")
+            connection.commit()
         except Exception as e:
             print(f"Error creating user: {str(e)}")
         finally:
             connection.close()
         return redirect(url_for('index'))
     return render_template('create_account.html')
+
+@app.route('/account')
+def account():
+    return render_template('account.html', user=current_user.info)
+
+@app.route('/account/settings')
+def settings():
+    return render_template('settings.html', user=current_user.info)
 
 if __name__ == '__main__':
     app.run(debug=True)
