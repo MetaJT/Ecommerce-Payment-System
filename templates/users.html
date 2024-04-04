@@ -9,13 +9,22 @@
     <body>
         <h1>DB665 DB Project</h1>
 
-        <a href="/login">Sign into your account</a>
-
+        <!-- If logged in, user is displayed, else login is displayed -->
+        {% if not currUser %}
+        <a href="/login">Login</a>
+        {% else %}
+        <h3>Signed in as: 
+            <span type="text" id="user"> 
+                {{ currUser['FirstName'] }}
+            </span><br>
+            <a href="/logout">Logout</a>
+        </h3>
+        {% endif %}
+        
         <h1>Buy Menu</h1>
         <input type="button" value="Jordans">
         <input type="button" value="Shirt">
         <input type="button" value="Golf Shoes">
-
 
         <h2>Users List</h2>
         <table border="1">
@@ -38,7 +47,6 @@
         </table>
     </body>
 </html>
-
 
 <a href="/about">About</a>
 <a href="/create_account">Create Account</a>
