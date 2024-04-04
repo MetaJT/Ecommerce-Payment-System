@@ -2,8 +2,10 @@
 
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div> 
@@ -12,23 +14,33 @@
     <div>
         <span>
             Select Account: 
-            {% for user_name in user_names %}
-            <button type="button" id="{{ user_name.firstName }}">
-            {{ user_name.firstName }}
+            {% for user in users %}
+            <button type="button" class="user-button" id="{{ user.UserID }}">
+            {{ user.FirstName }}
             </button>
             {% endfor %}        
         </span>
     </div>
-    <div>
-        <h3>Signed in as: 
-            <!-- "user" stores all of user info -->
-            <span type="text" id="user"> 
-                {{ FirstName }}
-            </span>
-        </h3>
+    <div class="login-table">
+        <form method="POST" action="/login">
+            <div class="user-details">
+                <div class="input-box">
+                    <label for="email">Email:</label>
+                    <input type="email" name="email" id="email" placeholder="enter email*" required>
+                </div>
+                <div class="input-box">
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" id="password" placeholder="password*" required> 
+                </div>
+                <div class="button">
+                    <button type="submit">Sign in</button>
+                </div>
+            </div>
+        </form>
     </div>
     <div>
         <a href="/home">Cancel</a>
+        <a href="/create_account">Create Account</a>
     </div>
     <div>
         <h2>Select your name to add funds to your account</h2>
