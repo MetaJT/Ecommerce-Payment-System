@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Item</title>
+    <link rel="stylesheet" text="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="add_item">
+    <h2>Add Item</h2>
+    <form method="POST" action="/add_item">
+        <div class="item-details">
+            <div class="input-box">
+                <label for="item_name">Name of item:</label>
+                <input type="text" name="item_name" id="item_nam" placeholder="Item Name*" required>
+            </div>
+            <div class="input-box">
+                <label for="item_type">Type of item:</label>
+                <input type="text" name="item_type" id="item_type" placeholder="Type of item*" required> 
+            </div>
+            <div class="input-box">
+                <label for="size">Select Size:</label>
+                <input type="text" name="size" id="size" placeholder="size*" required>
+            </div>
+            <div class="input-box">
+                <label for="description">Description:</label>
+                <input type="text" name="description" id="description" placeholder="Item Description" required>
+            </div>
+            <div class="input-box">
+                <label for="quantity">Quantity:</label>
+                <input type="text" name="quantity" id="quantity" placeholder="Enter item quantity*" required> 
+            </div>
+            <div class="input-box">
+                <label for="price">Price of item:</label>
+                <input type="text" name="price" id="price" placeholder="Enter item price*" required>
+            </div>
+            <div class="button">
+                <button type="submit">
+                    <a href="{{ url_for('index') }}">Cancel</a>
+                </button>
+            </div>
+            <div class="button">
+                <button type="submit">Add Item</button>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
