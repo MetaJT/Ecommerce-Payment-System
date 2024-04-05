@@ -38,6 +38,7 @@ def get_db_connection():
 
 # Create Tables
 def create_tables(sql_file):
+    print(sql_file)
     try:
         connection = get_db_connection()
         with connection.cursor() as cursor:
@@ -47,13 +48,12 @@ def create_tables(sql_file):
     finally:
         connection.close()
 
-create_tables('schema.py')
-
 @app.route('/')
 @app.route('/home')
 @app.route('/index')
 
 def index():
+    create_tables('schema.py')
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
