@@ -38,7 +38,6 @@ def get_db_connection():
 
 # Create Tables
 def create_tables(sql_file):
-    print(sql_file)
     try:
         connection = get_db_connection()
         with connection.cursor() as cursor:
@@ -63,16 +62,27 @@ def index():
     finally:
         connection.close()
     # If a user is logged in -> pass currUser info to HTML
+    print(get_items())
     if current_user.is_authenticated: 
-        return render_template('users.html', users=result, currUser=current_user.info)
-    else:
-        return render_template('users.html', users=result)
+        return render_template('users.html', users=result, currUser=current_user.info, items=get_items())
+    return render_template('users.html', users=result, items=get_items())
 
 def get_users():
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
             sql = "SELECT * FROM `ecommerceDB`.`Users`;"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+    finally:
+        connection.close()
+    return result
+
+def get_items():
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`Items`;"
             cursor.execute(sql)
             result = cursor.fetchall()
     finally:
@@ -92,6 +102,22 @@ def user_login():
             result = cursor.fetchone()
             if result:
                 return jsonify({'status': 'success', 'user': result})
+            else:
+                return jsonify({'status': 'failed'})
+    finally:
+        connection.close()
+
+@app.route('/get-item', methods=['GET',])
+def get_item():
+    itemID = request.args.get('itemID')
+    try:
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`Items` WHERE ItemID=%s;"
+            cursor.execute(sql, (itemID,))
+            result = cursor.fetchone()
+            if result:
+                return jsonify({'status': 'success', 'item': result})
             else:
                 return jsonify({'status': 'failed'})
     finally:
@@ -173,6 +199,30 @@ def create_account():
             connection.close()
         return redirect(url_for('index'))
     return render_template('create_account.html')
+
+@app.route('/add_item', methods=['GET', 'POST'])
+def add_item():
+    if request.method == 'POST':
+        name = request.form['item_name']
+        type = request.form['item_type']
+        size = request.form['size']
+        description = request.form['description']
+        quantity = request.form['quantity']
+        price = request.form['price']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO `ecommerceDB`.`Items` (`Name`, `Type`, `Size`, `Description`, `Quantity`,`Price`) VALUES (%s, %s, %s, %s, %s, %s)" # Need to add password
+                cursor.execute(sql, (item_name, item_type, size, description, quantity, price))
+                print("Successfully added item.")
+            connection.commit()
+        except Exception as e:
+            print(f"Error adding item: {str(e)}")
+        finally:
+            connection.close()
+        return redirect(url_for('index'))
+    return render_template('add_item.html')
 
 @app.route('/account')
 def account():

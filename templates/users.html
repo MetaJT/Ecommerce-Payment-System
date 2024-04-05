@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 <html>
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Users List</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
     </head>
 
     <body>
         <h1>DB665 DB Project</h1>
 
-        <!-- If logged in, user is displayed, else login is displayed -->
         {% if not currUser %}
         <a href="/login">Login</a>
+        <a href="/create_account">Create Account</a>
         {% else %}
         <h3>Signed in as: 
             <span type="text" id="user"> 
@@ -23,10 +25,25 @@
         {% endif %}
         
         <h1>Buy Menu</h1>
-        <input type="button" value="Jordans">
-        <input type="button" value="Shirt">
-        <input type="button" value="Golf Shoes">
-
+        <div>
+            <span>
+                <a href="/add_item">Add Items</a>
+                {% for item in items %}
+                <button type="button" class="item-button" id="{{ item.ItemID }}">
+                {{ item.Name }}
+                </button>
+                {% endfor %}        
+            </span>
+        </div>
+        <div>
+             <h3>Item: 
+                <span class="item-selected" id="name" >{{ name }}</span>
+            </h3>
+        </div>
+        <div>
+            Quantity: <span type="text" id="quantity">{{ quantity }}</span><br>
+            Price: <span type="text" id="price">{{ price }}</span>
+        </div>
         <h2>Users List</h2>
         <table border="1">
             <tr>
@@ -50,4 +67,3 @@
 </html>
 
 <a href="/about">About</a>
-<a href="/create_account">Create Account</a>
