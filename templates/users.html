@@ -10,20 +10,26 @@
 
     <body>
         <h1>DB665 DB Project</h1>
-
-        {% if not currUser %}
-        <a href="/login">Login</a>
-        <a href="/create_account">Create Account</a>
-        {% else %}
-        <h3>Signed in as: 
-            <span type="text" id="user"> 
-                {{ currUser['FirstName'] }}
-            </span><br>
-            <a href="/logout">Logout</a>
-            <a href="/account">Account</a>
-        </h3>
-        {% endif %}
-        
+        <nav class="navbar">
+             <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="about">About us</a></li>
+                {% if not currUser %}
+                <li class="user"><a href="/create_account">Create Account</a></li>
+                <li class="user"><a href="/login">Login</a></li>
+                {% else %}
+                <li class="user">
+                    <a href="#" class="user-name" id="user">{{ currUser['FirstName'] }}</a>
+                    <ul class="dropdown">
+                        <li><a href="/account">Account</a></li>
+                        <li><a href="">Orders</a></li>
+                        <li><a href="">Cart</a></li>
+                        <li><a href="/logout">Logout</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         <h1>Buy Menu</h1>
         <div>
             <span>
