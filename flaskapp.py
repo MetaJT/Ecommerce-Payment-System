@@ -15,7 +15,7 @@ class User(UserMixin):
 
     # Gets all the info attached to account from the DB
     # Stored as a dictionary
-    def info(): 
+    def info():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
@@ -233,4 +233,5 @@ def settings():
     return render_template('settings.html', user=current_user.info)
 
 if __name__ == '__main__':
+
     app.run(debug=True)
