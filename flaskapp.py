@@ -140,8 +140,8 @@ def load_user(user_id):
     finally:
         connection.close()
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/login', methods=['GET','POST'])
+def login(email=None,password=None):
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -162,6 +162,7 @@ def login():
                     flash('No account found with that email!')
         finally:
             connection.close()
+
     return render_template('login.html', users=get_users())
 
 @app.route('/logout')
@@ -177,7 +178,7 @@ def about():
 def payments():
     return render_template('payments.html')
 
-@app.route('/create_account', methods=['GET', 'POST'])
+@app.route('/create_account', methods=['GET','POST'])
 def create_account():
     if request.method == 'POST':
         first_name = request.form['first_name']
@@ -185,9 +186,8 @@ def create_account():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-
+        connection = get_db_connection()
         try:
-            connection = get_db_connection()
             with connection.cursor() as cursor:
                 sql = "INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) VALUES (%s, %s, %s, %s, %s)" # Need to add password
                 cursor.execute(sql, (first_name, last_name, username, email, password))
@@ -197,7 +197,7 @@ def create_account():
             print(f"Error creating user: {str(e)}")
         finally:
             connection.close()
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template('create_account.html')
 
 @app.route('/add_item', methods=['GET', 'POST'])
@@ -232,6 +232,19 @@ def account():
 def settings():
     return render_template('settings.html', user=current_user.info)
 
+@app.route('/delete-account',methods=['POST',])
+def delete_account():
+    if request.method == 'POST':
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;" # using Users table instead of users
+                cursor.execute(sql, (current_user.info['UserID'],))
+            connection.commit()
+            return redirect(url_for('index'))
+        finally:
+            connection.close()
+       
 if __name__ == '__main__':
 
     app.run(debug=True)

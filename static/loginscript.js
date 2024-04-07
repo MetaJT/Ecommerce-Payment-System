@@ -49,3 +49,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     })
 });
+
+// Account CRUD
+// Create
+
+// Delete
+function confirmDelete() {
+    if (confirm("Are you sure you want to delete your account?")) {
+        deleteAccount();
+    }
+}
+function deleteAccount() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/delete-account", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            alert("Your account has been deleted.");
+            window.location.href = "/home";
+        }
+    };
+    xhr.send();
+}

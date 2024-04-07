@@ -13,13 +13,13 @@
         <nav class="navbar">
              <ul>
                 <li><a href="#">Home</a></li>
-                <li><a href="about">About us</a></li>
+                <li><a href="about">About Us</a></li>
                 {% if not currUser %}
                 <li class="user"><a href="/create_account">Create Account</a></li>
                 <li class="user"><a href="/login">Login</a></li>
                 {% else %}
                 <li class="user">
-                    <a href="#" class="user-name" id="user">{{ currUser['FirstName'] }}</a>
+                    <a href="#" class="user-name" id="user">Hi, {{ currUser['FirstName'] }}</a>
                     <ul class="dropdown">
                         <li><a href="/account">Account</a></li>
                         <li><a href="">Orders</a></li>
