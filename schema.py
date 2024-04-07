@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Users (
     FirstName VARCHAR(255) NOT NULL,
     LastName VARCHAR(255) NOT NULL,
     Username VARCHAR(255) NOT NULL,
-    Email VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
     Address VARCHAR(255),
     Password VARCHAR(255) DEFAULT '111',
     PaymentInfo VARCHAR(255),
@@ -16,14 +16,23 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Users (
 );
 ''',
 '''
-CREATE TABLE IF NOT EXISTS Items (
-    ItemID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(25) NOT NULL,
-    Type VARCHAR(25) NOT NULL,
-    Size VARCHAR(10) NOT NULL,
-    Description VARCHAR(255) NOT NULL DEFAULT 'None.',
-    Quantity INT NOT NULL DEFAULT 5,
-    Price DECIMAL(10,2) NOT NULL DEFAULT 0.00
+CREATE TABLE IF NOT EXISTS ecommerceDB.Items (
+    ItemID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255),
+    Type VARCHAR(100),
+    Size VARCHAR(50),
+    Price DECIMAL(10, 2),
+    Description TEXT
+);
+''',
+'''
+CREATE TABLE IF NOT EXISTS ecommerceDB.Cart (
+    CartID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    ItemID INT,
+    Quantity INT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
 );
 ''',
 '''

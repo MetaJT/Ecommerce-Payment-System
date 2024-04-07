@@ -56,13 +56,11 @@ def index():
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`Users`;" # using Users table instead of users
+            sql = "SELECT * FROM `ecommerceDB`.`Users`;"
             cursor.execute(sql)
             result = cursor.fetchall()
     finally:
         connection.close()
-    # If a user is logged in -> pass currUser info to HTML
-    print(get_items())
     if current_user.is_authenticated: 
         return render_template('users.html', users=result, currUser=current_user.info, items=get_items())
     return render_template('users.html', users=result, items=get_items())
@@ -85,6 +83,23 @@ def get_items():
             sql = "SELECT * FROM `ecommerceDB`.`Items`;"
             cursor.execute(sql)
             result = cursor.fetchall()
+    finally:
+        connection.close()
+    return result
+
+def get_cart():
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+            SELECT Items.Name, Items.Type, Items.Size, Items.Price, Cart.Quantity, Cart.CartID
+            FROM Cart
+            INNER JOIN Items ON Cart.ItemID = Items.ItemID
+            WHERE Cart.UserID = %s
+            """
+            cursor.execute(sql, (current_user.info['UserID']))
+            result = cursor.fetchall()
+            print(result)
     finally:
         connection.close()
     return result
@@ -123,7 +138,6 @@ def get_item():
     finally:
         connection.close()
 
-# Responsible for loading the user object for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     connection = get_db_connection()
@@ -133,7 +147,6 @@ def load_user(user_id):
             cursor.execute(sql, (user_id,))
             user_data = cursor.fetchone()
             if user_data:
-                # Passes UserID from the DB and then all
                 return User(user_data)
             else:
                 return None  # User not found
@@ -148,11 +161,10 @@ def login(email=None,password=None):
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE Email=%s;" # using Users table instead of users
+                sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE Email=%s;" 
                 cursor.execute(sql, (email,))
                 connection.commit()
                 result = cursor.fetchone()
-                # creating user object to pass to Flask-Login::login_user
                 user = User(result) 
                 if result:
                     flash('Logged in successfully!', category='success')
@@ -189,7 +201,7 @@ def create_account():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) VALUES (%s, %s, %s, %s, %s)" # Need to add password
+                sql = "INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) VALUES (%s, %s, %s, %s, %s)"
                 cursor.execute(sql, (first_name, last_name, username, email, password))
                 print("Successfully created user.")
             connection.commit()
@@ -213,7 +225,7 @@ def add_item():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO `ecommerceDB`.`Items` (`Name`, `Type`, `Size`, `Description`, `Quantity`,`Price`) VALUES (%s, %s, %s, %s, %s, %s)" # Need to add password
+                sql = "INSERT INTO `ecommerceDB`.`Items` (`Name`, `Type`, `Size`, `Description`, `Quantity`,`Price`) VALUES (%s, %s, %s, %s, %s, %s)"
                 cursor.execute(sql, (item_name, item_type, size, description, quantity, price))
                 print("Successfully added item.")
             connection.commit()
@@ -232,19 +244,71 @@ def account():
 def settings():
     return render_template('settings.html', user=current_user.info)
 
-@app.route('/delete-account',methods=['POST',])
+@app.route('/delete-account',methods=['POST'])
 def delete_account():
     if request.method == 'POST':
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;" # using Users table instead of users
+                sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
                 cursor.execute(sql, (current_user.info['UserID'],))
             connection.commit()
             return redirect(url_for('index'))
         finally:
             connection.close()
-       
-if __name__ == '__main__':
 
+@app.route('/cart',methods=['GET','POST'])
+def cart():
+    if request.method == 'POST':
+        itemInfo = request.get_json()
+        userID = current_user.info['UserID']
+        itemID = itemInfo['id']
+        quantity = itemInfo['quantity']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO `ecommerceDB`.`Cart` (`UserID`, `ItemID`, `Quantity`) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (userID, itemID, quantity))
+            connection.commit()
+        finally:
+            connection.close()
+    return render_template('cart.html', cart=get_cart())
+
+@app.route('/remove-item', methods=['POST'])
+def remove_item():
+    if request.method == 'POST':
+        cart_info = request.get_json()
+        user_id = current_user.info['UserID']
+        cart_id = cart_info['cartID']
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                print((user_id, cart_id))
+                sql = "DELETE FROM `ecommerceDB`.`Cart` WHERE `UserID`=%s AND `CartID`=%s;"
+                cursor.execute(sql, (user_id, cart_id))
+            connection.commit()
+        finally:
+            connection.close()
+    return 'Item removed.', 200
+
+@app.route('/update-quantity', methods=['POST'])
+def update_quantity():
+    if request.method == 'POST':
+        item_info = request.get_json()
+        user_id = current_user.info['UserID']
+        cart_id = item_info['cartID']
+        new_quantity = item_info['newQuantity']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "UPDATE `ecommerceDB`.`Cart` SET `Quantity`=%s WHERE `UserID`=%s AND `CartID`=%s"
+                cursor.execute(sql, (new_quantity, user_id, cart_id))
+            connection.commit()
+        finally:
+            connection.close()
+    return "Quantity updated.", 200
+
+if __name__ == '__main__':
     app.run(debug=True)

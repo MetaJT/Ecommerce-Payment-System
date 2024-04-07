@@ -16,6 +16,27 @@ function signInUser(userId) {
     };
     xhr.send();
 }
+function addToCart() {
+    var quantity = document.getElementById('quantity').value;
+    var id = document.getElementById('id').value;
+
+    var itemData = {
+        id: id,
+        quantity: quantity,
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/cart", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onload = () => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          console.log(xhr.response);
+        } else {
+          console.log(`Error: ${xhr.status}`);
+        }
+    };
+    xhr.send(JSON.stringify(itemData));
+}
 function selectItem(itemId) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/get-item?itemID=' + itemId, true);
@@ -28,6 +49,7 @@ function selectItem(itemId) {
                 document.getElementById('name').innerText = response.item.Name;
                 document.getElementById('quantity').innerText = response.item.Quantity;
                 document.getElementById('price').innerText = response.item.Price;
+                document.getElementById('id').value = itemId;
             } else {
                 console.error('No item found');
             }

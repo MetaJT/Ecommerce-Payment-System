@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User's Cart</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {background-color: #f5f5f5;}
+        button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d32f2f;
+        }
+        .home-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .home-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>User's Cart</h1>
+    {% if cart %}
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Action</th>
+        </tr>
+        {% for item in cart %}
+        <tr>
+            <td>{{ item.Name }}</td>
+            <td>{{ item.Type }}</td>
+            <td>{{ item.Size }}</td>
+            <td>${{ item.Price }}</td>
+            <td>{{ item.Quantity }}</td>
+            <td><input type="number" id="quantity_{{ item.CartID }}" value="{{ item.Quantity }}" min="1" style="width: 50px;"></td>
+            <td><button onclick="updateQuantity('{{ item.CartID }}')">Update</button> <button onclick="removeItem('{{ item.CartID }}')">Remove</button></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p>
+        <script>
+            var cart = JSON.parse('{{ cart | tojson | safe }}');
+            function calculateTotalPrice(cart) {
+                var totalPrice = 0;
+                for (var i = 0; i < cart.length; i++) {
+                    totalPrice += cart[i].Price * cart[i].Quantity;
+                }
+                return totalPrice;
+            }
+            var total = calculateTotalPrice(cart);
+            document.write("<p>Total Price: $" + total.toFixed(2) + "</p>");
+        </script>
+    </p>
+    
+    <button onclick="checkout()">Checkout</button>
+    {% else %}
+    <p>Cart is empty. </p>
+    {% endif %}
+    <a href="/home" class="home-button">Go to Home</a>
+
+    <script>
+        function updateQuantity(cartID) {
+            var newQuantity = document.getElementById("quantity_" + cartID).value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/update-quantity", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    alert("Quantity updated.");
+                    window.location.reload();
+                }
+            };
+            xhr.send(JSON.stringify({cartID: cartID, newQuantity: newQuantity}));
+        }
+
+        function removeItem(cartID) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/remove-item", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = () => {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    alert("Item removed from cart.");
+                    window.location.reload();
+                    console.log(xhr.response);
+                } else {
+                console.log(`Error: ${xhr.status}`);
+                }
+            };
+            xhr.send(JSON.stringify({cartID: cartID}));
+        }
+
+        function checkout() {
+            // Still need
+            alert("Proceeding to checkout.");
+        }
+    </script>
+</body>
+</html>
