@@ -1,74 +1,76 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Users List</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-        <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
-    </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB665 DB Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
+</head>
+<body>
+    <h1>DB665 DB Project</h1>
 
-    <body>
-        <h1>DB665 DB Project</h1>
-        <nav class="navbar">
-             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="about">About Us</a></li>
-                {% if not currUser %}
-                <li class="user"><a href="/create_account">Create Account</a></li>
-                <li class="user"><a href="/login">Login</a></li>
-                {% else %}
-                <li class="user">
-                    <a href="#" class="user-name" id="user">Hi, {{ currUser['FirstName'] }}</a>
-                    <ul class="dropdown">
-                        <li><a href="/account">Account</a></li>
-                        <li><a href="">Orders</a></li>
-                        <li><a href="/cart">Cart</a></li>
-                        <li><a href="/logout">Logout</a></li>
-                    </ul>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        <h1>Buy Menu</h1>
-        <div>
-            <span>
-                <a href="/add_item">Add Items</a>
-                {% for item in items %}
-                <button type="button" class="item-button" id="{{ item.ItemID }}">
-                {{ item.Name }}
-                </button>
-                {% endfor %}        
-            </span>
-        </div>
-        <div>
-            <h3>Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
-            <p>Price: $<span class="item-price" id="price">{{ price }}</span></p>
-            <span class="item-id" id="id"></span>
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" min="1" value="1">
-            <button onclick="addToCart()">Add to Cart</button>
-        </div>
-        <h2>Users List</h2>
-        <table border="1">
-            <tr>
-                <th>UserID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Balance</th>
-                <th>Address</th>
-            </tr>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.UserID }}</td>
-                <td>{{ user.FirstName }}</td>
-                <td>{{ user.LastName }}</td>
-                <td>{{ user.Balance }}</td>
-                <td>{{ user.Address }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="about">About Us</a></li>
+            {% if not currUser %}
+            <li class="user"><a href="/create_account">Create Account</a></li>
+            <li class="user"><a href="/login">Login</a></li>
+            {% else %}
+            <li class="user">
+                <a href="#" class="user-name" id="user">Hi, {{ currUser['FirstName'] }}</a>
+                <ul class="dropdown">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="">Orders</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Buy Menu -->
+    <h1>Buy Menu</h1>
+    <div>
+        <span>
+            <a href="/add_item">Add Items</a>
+            {% for item in items %}
+            <button type="button" class="item-button" id="{{ item.ItemID }}">{{ item.Name }}</button>
+            {% endfor %}        
+        </span>
+    </div>
+    <div>
+        <h3>Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
+        <p>Price: $<span class="item-price" id="price">{{ price }}</span></p>
+        <span class="item-id" id="id"></span>
+        <p>Size: <span class="item-size" id="size"></span></p>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" min="1" value="1">
+        <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <!-- Users List -->
+    <h2>Users List</h2>
+    <table border="1">
+        <tr>
+            <th>UserID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Balance</th>
+            <th>Address</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.UserID }}</td>
+            <td>{{ user.FirstName }}</td>
+            <td>{{ user.LastName }}</td>
+            <td>{{ user.Balance }}</td>
+            <td>{{ user.Address }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
 </html>
-
-<a href="/about">About</a>

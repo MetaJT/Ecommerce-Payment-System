@@ -9,9 +9,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Users (
     LastName VARCHAR(255) NOT NULL,
     Username VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
-    Address VARCHAR(255),
     Password VARCHAR(255) DEFAULT '111',
-    PaymentInfo VARCHAR(255),
     Balance DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
 ''',
@@ -60,6 +58,29 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Payments (
     PaymentDate DATE ,
     Amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     PaymentMethod VARCHAR(255)
+);
+''',
+'''
+CREATE TABLE IF NOT EXISTS ShippingAddresses (
+    AddressID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    Address VARCHAR(255),
+    City VARCHAR(100),
+    State VARCHAR(100),
+    PostalCode VARCHAR(20),
+    Country VARCHAR(100),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+''',
+'''
+CREATE TABLE IF NOT EXISTS PaymentMethods (
+    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    CardType VARCHAR(50),
+    CardNumber VARCHAR(100),
+    ExpiryDate DATE,
+    CVV VARCHAR(10),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 '''
 ]

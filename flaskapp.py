@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, url_for, redirect, request, jsonify
+from flask import Flask, render_template, request, flash, url_for, redirect, jsonify
 from flask_login import login_user, logout_user, UserMixin, LoginManager, current_user
 import pymysql
 from schema import create_queries
@@ -12,19 +12,6 @@ class User(UserMixin):
     def __init__(self, user_info):
         self.id = str(user_info['UserID'])
         self.info = dict(user_info)
-
-    # Gets all the info attached to account from the DB
-    # Stored as a dictionary
-    def info():
-        connection = get_db_connection()
-        try:
-            with connection.cursor() as cursor:
-                sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
-                cursor.execute(sql, (id,))
-                result = cursor.fetchall()
-                return result
-        finally:
-            connection.close()
 
 # Initialize MySQL
 def get_db_connection():
@@ -50,7 +37,6 @@ def create_tables(sql_file):
 @app.route('/')
 @app.route('/home')
 @app.route('/index')
-
 def index():
     create_tables('schema.py')
     connection = get_db_connection()
@@ -92,35 +78,18 @@ def get_cart():
     try:
         with connection.cursor() as cursor:
             sql = """
-            SELECT Items.Name, Items.Type, Items.Size, Items.Price, Cart.Quantity, Cart.CartID
+            SELECT Items.Name, Items.Type, Items.Size, Items.Price, SUM(Cart.Quantity) AS TotalQuantity, Cart.CartID
             FROM Cart
             INNER JOIN Items ON Cart.ItemID = Items.ItemID
             WHERE Cart.UserID = %s
+            GROUP BY 
+            Items.ItemID, Items.Name, Items.Type, Items.Size, Items.Price;
             """
-            cursor.execute(sql, (current_user.info['UserID']))
+            cursor.execute(sql, (current_user.info['UserID'],))
             result = cursor.fetchall()
-            print(result)
     finally:
         connection.close()
     return result
-
-# This route is used for the js request, not ideal to keep
-# Will try and do something with this
-@app.route('/user-login', methods=['GET',])
-def user_login():
-    userID = request.args.get('userID')
-    try:
-        connection = get_db_connection()
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
-            cursor.execute(sql, (userID,))
-            result = cursor.fetchone()
-            if result:
-                return jsonify({'status': 'success', 'user': result})
-            else:
-                return jsonify({'status': 'failed'})
-    finally:
-        connection.close()
 
 @app.route('/get-item', methods=['GET',])
 def get_item():
@@ -150,6 +119,23 @@ def load_user(user_id):
                 return User(user_data)
             else:
                 return None  # User not found
+    finally:
+        connection.close()
+
+@app.route('/user-login', methods=['GET',])
+def user_login():
+    userID = request.args.get('userID')
+    try:
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
+            cursor.execute(sql, (userID,))
+            result = cursor.fetchone()
+            
+            if result:
+                return jsonify({'status': 'success', 'user': result})
+            else:
+                return jsonify({'status': 'failed'})
     finally:
         connection.close()
 
@@ -212,6 +198,135 @@ def create_account():
         return redirect(url_for('login'))
     return render_template('create_account.html')
 
+@app.route('/account')
+def account():
+    return render_template('account.html', user=current_user.info)
+
+@app.route('/account/settings')
+def settings():
+    return render_template('settings.html', user=current_user.info)
+
+@app.route('/edit-account-details', methods=['POST'])
+def update_account():
+    if request.method == 'POST':
+        user_info = request.get_json()
+        email = user_info['email']
+        password = user_info['password']
+        username = user_info['username']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "UPDATE `ecommerceDB`.`Users` SET `Email`=%s, `Password`=%s, `Username`=%s WHERE `UserID`=%s"
+                cursor.execute(sql, (email, password, username, current_user.info['UserID']))
+            connection.commit()
+        finally:
+            connection.close()
+        return "Account updated.", 200
+    else:
+        return "Invalid request method", 400
+
+# Need a route to add an address to a user
+
+@app.route('/edit-shipping-details', methods=['POST'])
+def update_shipping():
+    if request.method == 'POST':
+        address = request.form['address']
+        city = request.form['city']
+        state = request.form['state']
+        postal_code = request.form['postal-code']
+        country = request.form['country']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = '''
+                INSERT INTO `ShippingAddresses` (UserID, Address, City, State, PostalCode, Country) 
+                VALUES (%s, %s, %s, %s, %s, %s) 
+                ON DUPLICATE KEY UPDATE Address=%s, City=%s, State=%s, PostalCode=%s, Country=%s
+                '''
+                cursor.execute(sql, 
+                (current_user.info['UserID'], address, city, state, postal_code, country, address, 
+                city, state, postal_code, country))
+            connection.commit()
+        finally:
+            connection.close()
+        return "Shipping address updated.", 200
+    else:
+        return "Invalid request method", 400
+
+# Need to add a route to add a payment method for a user
+
+@app.route('/edit-payment-details', methods=['POST'])
+def update_payment():
+    if request.method == 'POST':
+        card_number = request.form['card-number']
+        cardholder_name = request.form['cardholder-name']
+        expiration_date = request.form['expiration-date']
+        cvv = request.form['cvv']
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = '''
+                INSERT INTO `PaymentDetails` (UserID, CardNumber, CardholderName, ExpirationDate, CVV) 
+                VALUES (%s, %s, %s, %s, %s) 
+                ON DUPLICATE KEY UPDATE CardNumber=%s, CardholderName=%s, ExpirationDate=%s, CVV=%s
+                '''
+                cursor.execute(sql, 
+                (current_user.info['UserID'], card_number, cardholder_name, expiration_date, 
+                cvv, card_number, cardholder_name, expiration_date, cvv))
+            connection.commit()
+        finally:
+            connection.close()
+        return "Payment information updated.", 200
+    else:
+        return "Invalid request method", 400
+
+@app.route('/delete-account',methods=['POST'])
+def delete_account():
+    if request.method == 'POST':
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
+                cursor.execute(sql, (current_user.info['UserID'],))
+            connection.commit()
+            return redirect(url_for('index'))
+        finally:
+            connection.close()
+
+@app.route('/cart',methods=['GET','POST'])
+def cart():
+    if request.method == 'POST':
+        itemInfo = request.get_json()
+        print(itemInfo)
+        userID = current_user.info['UserID']
+        itemID = itemInfo['id']
+        quantity = int(itemInfo['quantity'])
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql_check = "SELECT * FROM `Cart` WHERE `UserID`=%s AND `ItemID`=%s"
+                cursor.execute(sql_check, (userID, itemID, ))
+                existing_item = cursor.fetchone()
+                
+                if existing_item:
+                    # If the item already exists, update its quantity
+                    new_quantity = existing_item['Quantity'] + quantity
+                    sql_update = "UPDATE `Cart` SET `Quantity`=%s WHERE `UserID`=%s AND `ItemID`=%s"
+                    cursor.execute(sql_update, (new_quantity, userID, itemID))
+                else:
+                    # If the item doesn't exist, insert a new entry
+                    sql_insert = "INSERT INTO `ecommerceDB`.`Cart` (`UserID`, `ItemID`, `Quantity`) VALUES (%s, %s, %s)"
+                    cursor.execute(sql_insert, (userID, itemID, quantity))
+                connection.commit()
+        finally:
+            connection.close()
+
+    return render_template('cart.html', cart=get_cart(), user=current_user.info)
+
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_item():
     if request.method == 'POST':
@@ -236,45 +351,6 @@ def add_item():
         return redirect(url_for('index'))
     return render_template('add_item.html')
 
-@app.route('/account')
-def account():
-    return render_template('account.html', user=current_user.info)
-
-@app.route('/account/settings')
-def settings():
-    return render_template('settings.html', user=current_user.info)
-
-@app.route('/delete-account',methods=['POST'])
-def delete_account():
-    if request.method == 'POST':
-        connection = get_db_connection()
-        try:
-            with connection.cursor() as cursor:
-                sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
-                cursor.execute(sql, (current_user.info['UserID'],))
-            connection.commit()
-            return redirect(url_for('index'))
-        finally:
-            connection.close()
-
-@app.route('/cart',methods=['GET','POST'])
-def cart():
-    if request.method == 'POST':
-        itemInfo = request.get_json()
-        userID = current_user.info['UserID']
-        itemID = itemInfo['id']
-        quantity = itemInfo['quantity']
-
-        connection = get_db_connection()
-        try:
-            with connection.cursor() as cursor:
-                sql = "INSERT INTO `ecommerceDB`.`Cart` (`UserID`, `ItemID`, `Quantity`) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (userID, itemID, quantity))
-            connection.commit()
-        finally:
-            connection.close()
-    return render_template('cart.html', cart=get_cart())
-
 @app.route('/remove-item', methods=['POST'])
 def remove_item():
     if request.method == 'POST':
@@ -284,7 +360,6 @@ def remove_item():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                print((user_id, cart_id))
                 sql = "DELETE FROM `ecommerceDB`.`Cart` WHERE `UserID`=%s AND `CartID`=%s;"
                 cursor.execute(sql, (user_id, cart_id))
             connection.commit()
