@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User's Cart</title>
-    <style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
+    <!-- <style>
         table {
             width: 100%;
             border-collapse: collapse;
@@ -39,9 +41,26 @@
         .home-button:hover {
             background-color: #45a049;
         }
-    </style>
+    </style> -->
 </head>
 <body>
+<!-- Navigation -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/about">About Us</a></li>
+            <li class="user">
+                <a href="#" class="user-name" id="user">Hi, {{ user['FirstName'] }}</a>
+                <ul class="dropdown">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="">Orders</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
     <h1>User's Cart</h1>
     {% if cart %}
     <table>
@@ -59,8 +78,8 @@
             <td>{{ item.Type }}</td>
             <td>{{ item.Size }}</td>
             <td>${{ item.Price }}</td>
-            <td>{{ item.Quantity }}</td>
-            <td><input type="number" id="quantity_{{ item.CartID }}" value="{{ item.Quantity }}" min="1" style="width: 50px;"></td>
+            <td>{{ item.TotalQuantity }}</td>
+            <td><input type="number" id="quantity_{{ item.CartID }}" value="{{ item.TotalQuantity }}" min="1" style="width: 50px;"></td>
             <td><button onclick="updateQuantity('{{ item.CartID }}')">Update</button> <button onclick="removeItem('{{ item.CartID }}')">Remove</button></td>
         </tr>
         {% endfor %}
@@ -71,7 +90,7 @@
             function calculateTotalPrice(cart) {
                 var totalPrice = 0;
                 for (var i = 0; i < cart.length; i++) {
-                    totalPrice += cart[i].Price * cart[i].Quantity;
+                    totalPrice += cart[i].Price * cart[i].TotalQuantity;
                 }
                 return totalPrice;
             }
@@ -85,42 +104,5 @@
     <p>Cart is empty. </p>
     {% endif %}
     <a href="/home" class="home-button">Go to Home</a>
-
-    <script>
-        function updateQuantity(cartID) {
-            var newQuantity = document.getElementById("quantity_" + cartID).value;
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/update-quantity", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    alert("Quantity updated.");
-                    window.location.reload();
-                }
-            };
-            xhr.send(JSON.stringify({cartID: cartID, newQuantity: newQuantity}));
-        }
-
-        function removeItem(cartID) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/remove-item", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onload = () => {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    alert("Item removed from cart.");
-                    window.location.reload();
-                    console.log(xhr.response);
-                } else {
-                console.log(`Error: ${xhr.status}`);
-                }
-            };
-            xhr.send(JSON.stringify({cartID: cartID}));
-        }
-
-        function checkout() {
-            // Still need
-            alert("Proceeding to checkout.");
-        }
-    </script>
 </body>
 </html>
