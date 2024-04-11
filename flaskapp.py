@@ -34,62 +34,87 @@ def create_tables(sql_file):
     finally:
         connection.close()
 
+# Execute Queries
+def execute_query(query, values=None):
+    connection = get_db_connection()
+    try:
+        cursor = connection.cursor()
+        if values:
+            cursor.execute(query, values)
+        else:
+            cursor.execute(query)
+        
+        if query.strip().split(" ")[0].upper() == "SELECT":
+            if cursor.description:  # Checking if there are any results
+                result = cursor.fetchall()
+                if len(result) == 1 and len(result[0]) == 1:  # If only one row with one column, return the value directly
+                    return result[0][0]
+                return result
+            else:
+                return None  # Return None if no results
+
+        else:
+            connection.commit()
+            return True
+    except Exception as e:
+        print("Error:", e)
+        return False
+    finally:
+        connection.close()
+
 @app.route('/')
 @app.route('/home')
 @app.route('/index')
 def index():
     create_tables('schema.py')
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`Users`;"
-            cursor.execute(sql)
-            result = cursor.fetchall()
-    finally:
-        connection.close()
+    sql = "SELECT * FROM `ecommerceDB`.`Users`;"
+    result = execute_query(sql)
+
     if current_user.is_authenticated: 
         return render_template('users.html', users=result, currUser=current_user.info, items=get_items())
     return render_template('users.html', users=result, items=get_items())
 
 def get_users():
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`Users`;"
-            cursor.execute(sql)
-            result = cursor.fetchall()
-    finally:
-        connection.close()
-    return result
+    sql = "SELECT * FROM `ecommerceDB`.`Users`;"
+    return execute_query(sql)
 
 def get_items():
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `ecommerceDB`.`Items`;"
-            cursor.execute(sql)
-            result = cursor.fetchall()
-    finally:
-        connection.close()
-    return result
+    sql = "SELECT * FROM `ecommerceDB`.`Items`;"
+    return execute_query(sql)
 
 def get_cart():
+    sql = """
+    SELECT Items.Name, Items.Type, Items.Size, Items.Price, SUM(Cart.Quantity) AS TotalQuantity, Cart.CartID
+    FROM Cart
+    INNER JOIN Items ON Cart.ItemID = Items.ItemID
+    WHERE Cart.UserID=%s
+    GROUP BY 
+    Items.ItemID, Items.Name, Items.Type, Items.Size, Items.Price;
+    """
+    return execute_query(sql, (current_user.info['UserID'],))
+
+def get_order_history():
+    sql = "SELECT * FROM ecommerceDB.Orders WHERE UserID=%s"
+    return execute_query(sql, (current_user.info['UserID'],))
+
+def get_address_info():
+    sql = "SELECT * FROM ecommerceDB.ShippingAddresses WHERE UserID=%s"
+    return execute_query(sql, (current_user.info['UserID'],))
+
+@app.route('/')
+def get_payment_info():
+    sql = "SELECT * FROM ecommerceDB.PaymentMethods WHERE UserID=%s"
+    return execute_query(sql, (current_user.info['UserID'],))
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            sql = """
-            SELECT Items.Name, Items.Type, Items.Size, Items.Price, SUM(Cart.Quantity) AS TotalQuantity, Cart.CartID
-            FROM Cart
-            INNER JOIN Items ON Cart.ItemID = Items.ItemID
-            WHERE Cart.UserID = %s
-            GROUP BY 
-            Items.ItemID, Items.Name, Items.Type, Items.Size, Items.Price;
-            """
+            sql = "SELECT * FROM ecommerceDB.PaymentMethods WHERE UserID=%s"
             cursor.execute(sql, (current_user.info['UserID'],))
-            result = cursor.fetchall()
+        connection.commit()
+        payment_info = cursor.fetchone()
     finally:
         connection.close()
-    return result
+    return payment_info
 
 @app.route('/get-item', methods=['GET',])
 def get_item():
@@ -154,7 +179,7 @@ def login(email=None,password=None):
                 user = User(result) 
                 if result:
                     flash('Logged in successfully!', category='success')
-                    login_user(user) # Logs user in
+                    login_user(user)
                     return redirect(url_for('index'))
                 else:
                     flash('No account found with that email!')
@@ -187,7 +212,10 @@ def create_account():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) VALUES (%s, %s, %s, %s, %s)"
+                sql = '''
+                INSERT INTO `ecommerceDB`.`Users` (`FirstName`, `LastName`, `Username`, `Email`, `Password`) 
+                VALUES (%s, %s, %s, %s, %s)
+                '''
                 cursor.execute(sql, (first_name, last_name, username, email, password))
                 print("Successfully created user.")
             connection.commit()
@@ -260,9 +288,9 @@ def update_shipping():
 @app.route('/edit-payment-details', methods=['POST'])
 def update_payment():
     if request.method == 'POST':
-        card_number = request.form['card-number']
-        cardholder_name = request.form['cardholder-name']
-        expiration_date = request.form['expiration-date']
+        cardNumber = request.form['card-number']
+        cardholderName = request.form['cardholder-name']
+        expirationDate = request.form['expiration-date']
         cvv = request.form['cvv']
 
         connection = get_db_connection()
@@ -274,8 +302,8 @@ def update_payment():
                 ON DUPLICATE KEY UPDATE CardNumber=%s, CardholderName=%s, ExpirationDate=%s, CVV=%s
                 '''
                 cursor.execute(sql, 
-                (current_user.info['UserID'], card_number, cardholder_name, expiration_date, 
-                cvv, card_number, cardholder_name, expiration_date, cvv))
+                (current_user.info['UserID'], cardNumber, cardholderName, expirationDate, 
+                cvv, cardNumber, cardholderName, expirationDate, cvv))
             connection.commit()
         finally:
             connection.close()
@@ -290,7 +318,7 @@ def delete_account():
         try:
             with connection.cursor() as cursor:
                 sql = "DELETE FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
-                cursor.execute(sql, (current_user.info['UserID'],))
+                cursor.execute(sql, (current_user.info['UserID']))
             connection.commit()
             return redirect(url_for('index'))
         finally:
@@ -340,7 +368,10 @@ def add_item():
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO `ecommerceDB`.`Items` (`Name`, `Type`, `Size`, `Description`, `Quantity`,`Price`) VALUES (%s, %s, %s, %s, %s, %s)"
+                sql = '''
+                INSERT INTO `ecommerceDB`.`Items` (`Name`, `Type`, `Size`, `Description`, `Quantity`,`Price`) 
+                VALUES (%s, %s, %s, %s, %s, %s)
+                '''
                 cursor.execute(sql, (item_name, item_type, size, description, quantity, price))
                 print("Successfully added item.")
             connection.commit()
@@ -355,13 +386,14 @@ def add_item():
 def remove_item():
     if request.method == 'POST':
         cart_info = request.get_json()
-        user_id = current_user.info['UserID']
-        cart_id = cart_info['cartID']
+        userID = current_user.info['UserID']
+        cartID = cart_info['cartID']
+
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
                 sql = "DELETE FROM `ecommerceDB`.`Cart` WHERE `UserID`=%s AND `CartID`=%s;"
-                cursor.execute(sql, (user_id, cart_id))
+                cursor.execute(sql, (userID, cartID))
             connection.commit()
         finally:
             connection.close()
@@ -371,19 +403,64 @@ def remove_item():
 def update_quantity():
     if request.method == 'POST':
         item_info = request.get_json()
-        user_id = current_user.info['UserID']
-        cart_id = item_info['cartID']
-        new_quantity = item_info['newQuantity']
+        userID = current_user.info['UserID']
+        cartID = item_info['cartID']
+        newQuantity = item_info['newQuantity']
 
         connection = get_db_connection()
         try:
             with connection.cursor() as cursor:
                 sql = "UPDATE `ecommerceDB`.`Cart` SET `Quantity`=%s WHERE `UserID`=%s AND `CartID`=%s"
-                cursor.execute(sql, (new_quantity, user_id, cart_id))
+                cursor.execute(sql, (newQuantity, userID, cartID))
             connection.commit()
         finally:
             connection.close()
     return "Quantity updated.", 200
 
+@app.route('/checkout', methods=['GET','POST'])
+def checkout():
+    address_info = get_address_info()
+    payment_info = get_payment_info()
+    return render_template('checkout.html', user=current_user.info, address_info=address_info, payment_info=payment_info)
+
+@app.route('/submit-purchase', methods=['GET','POST'])
+def submit_purchase():
+    # Take the users ID, the items in their cart, and the users address
+    if request.method == 'POST':
+        try:
+            with connection.cursor() as cursor:
+                sql = '''
+                INSERT INTO ecommerceDB.Orders (UserID, ItemID, Quantity, Price, OrderDate)
+                SELECT c.UserID, c.ItemID, c.Quantity, i.Price, CURDATE()
+                FROM ecommerce.Cart c
+                JOIN Items i ON c.ItemID = i.ItemID
+                GROUP BY c.UserID;
+                '''
+                execute_quert(sql)
+                
+                sql = "DELETE FROM ecommerce.Cart WHERE UserID=%s"
+                value = current_user.info['UserID']
+
+                execute_query(sql,values)
+
+            connection.commit()
+        finally:
+            connection.close()
+
+@app.route('/orders', methods=['GET','POST'])
+def orders():
+    return render_template('orders.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+# Date:
+# Time:
+# Customer:
+# Item recap:
+# -> item name/qty/price/ammount
+# Purchase approved
+# Total charged
+# Card type
+# Acct number

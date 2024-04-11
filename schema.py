@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Payments (
 );
 ''',
 '''
-CREATE TABLE IF NOT EXISTS ShippingAddresses (
+CREATE TABLE IF NOT EXISTS ecommerceDB.ShippingAddresses (
     AddressID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     Address VARCHAR(255),
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS ShippingAddresses (
 );
 ''',
 '''
-CREATE TABLE IF NOT EXISTS PaymentMethods (
+CREATE TABLE IF NOT EXISTS ecommerceDB.PaymentMethods (
     PaymentID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     CardType VARCHAR(50),
@@ -82,5 +82,17 @@ CREATE TABLE IF NOT EXISTS PaymentMethods (
     CVV VARCHAR(10),
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
+''',
+'''
+CREATE TABLE IF NOT EXISTS ecommerceDB.Orders (
+    OrderID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    ItemID INT NOT NULL,
+    Quantity INT NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL,
+    OrderDate DATE NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
+    );
 '''
 ]

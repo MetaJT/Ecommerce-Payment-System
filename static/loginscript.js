@@ -140,9 +140,26 @@ function checkout() {
     // Still need
     alert("Proceeding to checkout.");
 }
+function submit_purchase() {
+    fetch('/submit-purchase', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log("Purchase successful!");
+        } else {
+            console.error("Failed to complete purchase:", response.statusText);
+        }
+    })
+    .catch(error => {
+        console.error("Error submitting purchase:", error);
+    });
+}
 
 // Button 
-
 document.addEventListener('DOMContentLoaded', function() {
     var userButtons = document.querySelectorAll('.user-button');
     userButtons.forEach(function(button) {
