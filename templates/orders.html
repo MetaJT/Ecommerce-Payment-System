@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
+    <style>
+        .hidden {
+            display: none;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order History</h1>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li class="user">
+                <a href="#" class="user-name" id="user">Hi, {{ user['FirstName'] }}</a>
+                <ul class="dropdown">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>Item ID</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order[0] }}</td>
+                <td>{{ order[1] }}</td>
+                <td>{{ order[2] }}</td>
+                <td>{{ order[3] }}</td>
+                <td>{{ order[4] }}</td>
+                <td>{{ order[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

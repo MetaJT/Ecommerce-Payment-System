@@ -449,7 +449,7 @@ def submit_purchase():
 
 @app.route('/orders', methods=['GET','POST'])
 def orders():
-    return render_template('orders.html')
+    return render_template('orders.html',  user=current_user.info)
 
 
 if __name__ == '__main__':
