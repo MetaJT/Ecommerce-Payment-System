@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+<h1>Add Funds to Your Account</h1>
+
+<form action="{{ url_for('update_balance') }}" method="post">
+    <button name="amount" type="submit" value="100">Deposit $100</button>
+    <button name="amount" type="submit" value="250">Deposit $250</button>
+    <button name="amount" type="submit" value="500">Deposit $500</button>
+    <button name="amount" type="submit" value="1000">Deposit $1000</button>
+</form>
+
+
+</html>

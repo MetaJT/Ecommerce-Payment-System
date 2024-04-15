@@ -197,9 +197,6 @@ def logout():
 def about():
     return render_template('about.html')
 
-@app.route('/payments')
-def payments():
-    return render_template('payments.html')
 
 @app.route('/create_account', methods=['GET','POST'])
 def create_account():
@@ -436,7 +433,7 @@ def submit_purchase():
                 JOIN Items i ON c.ItemID = i.ItemID
                 GROUP BY c.UserID;
                 '''
-                execute_quert(sql)
+                execute_query(sql)
                 
                 sql = "DELETE FROM ecommerce.Cart WHERE UserID=%s"
                 value = current_user.info['UserID']
@@ -450,6 +447,27 @@ def submit_purchase():
 @app.route('/orders', methods=['GET','POST'])
 def orders():
     return render_template('orders.html',  user=current_user.info)
+
+# renders /deposit.html in order for users to add money to their accounts
+@app.route('/deposit')
+def deposit():
+    return render_template('/deposit.html')
+
+# used so users can add funds to their account
+@app.route('/update_balance', methods=['GET', 'POST'])
+def update_balance():
+    amount = request.form['amount']
+    userID = current_user.info['UserID']
+    if request.method == 'POST':
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "UPDATE `ecommerceDB`.`Users` SET balance = balance + %s WHERE `UserID`=%s;"
+                cursor.execute(sql, (amount, userID))
+            connection.commit()
+        finally:
+            connection.close()
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
