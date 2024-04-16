@@ -15,11 +15,11 @@
         <ul>
             <li><a href="#">Home</a></li>
             <li><a href="about">About Us</a></li>
-            <li><a href="deposit">Deposit</li>
             {% if not currUser %}
             <li class="user"><a href="/create_account">Create Account</a></li>
             <li class="user"><a href="/login">Login</a></li>
             {% else %}
+            <li><a href="deposit">Deposit</a></li>
             <li class="user">
                 <a href="#" class="user-name" id="user">Hi, {{ currUser['FirstName'] }}</a>
                 <ul class="dropdown">

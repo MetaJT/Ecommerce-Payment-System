@@ -416,10 +416,6 @@ def orders():
 
         finally:
             connection.close()
-            
-@app.route('/orders', methods=['GET','POST'])
-def orders():
-    return render_template('orders.html',  user=current_user.info)
 
 # renders /deposit.html in order for users to add money to their accounts
 @app.route('/deposit')
