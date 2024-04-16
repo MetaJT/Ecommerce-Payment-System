@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, flash, url_for, redirect, jso
 from flask_login import login_user, logout_user, UserMixin, LoginManager, current_user
 import pymysql
 from schema import create_queries
-import logging
 
 app = Flask(__name__)
 app.secret_key = 'key'
@@ -111,15 +110,14 @@ def get_payment_info():
 def get_item():
     itemID = request.args.get('itemID')
     sql = "SELECT * FROM `ecommerceDB`.`Items` WHERE ItemID=%s;"
-    result = execute_query(sql, (itemID,))[0]
+    result = execute_query(sql, (itemID,))
     if result:
-        return jsonify({'status': 'success', 'item': result})
+        return jsonify({'status': 'success', 'item': result[0]})
     else:
         return jsonify({'status': 'failed'})
 
 @login_manager.user_loader
 def load_user(user_id):
-    print(user_id)
     sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
     result = execute_query(sql, (user_id,)) # Fetch one
     if result:
@@ -131,9 +129,9 @@ def load_user(user_id):
 def user_login():
     user_id = request.args.get('userID')
     sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE UserID=%s;"
-    result = execute_query(sql, (user_id,))[0] # Fetch one
+    result = execute_query(sql, (user_id,))# Fetch one
     if result:
-        return jsonify({'status': 'success', 'user': result})
+        return jsonify({'status': 'success', 'user': result[0]})
     else:
         return jsonify({'status': 'failed'})
 
@@ -143,8 +141,8 @@ def login(email=None,password=None):
         email = request.form['email']
         password = request.form['password']
         sql = "SELECT * FROM `ecommerceDB`.`Users` WHERE Email=%s;" 
-        result = execute_query(sql, (email,))[0] # Fetch one
-        user = User(result) 
+        result = execute_query(sql, (email,)) # Fetch one
+        user = User(result[0]) 
         if result:
             login_user(user)
             return redirect(url_for('index'))
@@ -197,7 +195,6 @@ def update_account():
         username = user_info['username']
         sql = "UPDATE `ecommerceDB`.`Users` SET `Email`=%s, `Password`=%s, `Username`=%s WHERE `UserID`=%s"
         execute_query(sql, (email, password, username, current_user.info['UserID']))
-        print("success")
         return "Account updated.", 200
     else:
         return "Invalid request method", 400
@@ -261,7 +258,6 @@ def delete_account():
 def cart():
     if request.method == 'POST':
         itemInfo = request.get_json()
-        print(itemInfo)
         userID = current_user.info['UserID']
         itemID = itemInfo['id']
         quantity = int(itemInfo['quantity'])
