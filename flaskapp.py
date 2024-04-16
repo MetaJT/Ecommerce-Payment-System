@@ -157,9 +157,6 @@ def logout():
 def about():
     return render_template('about.html')
 
-@app.route('/payments')
-def payments():
-    return render_template('payments.html')
 
 @app.route('/create_account', methods=['GET','POST'])
 def create_account():
@@ -394,6 +391,14 @@ def orders():
                     total_items += item['Quantity']
                     total_price += item['Quantity'] * item['Price']
                     cursor.execute(order_items_insert_query, (order_id, item['ItemID'], item['Quantity'], item['Price']))
+                sql = '''
+                INSERT INTO ecommerceDB.Orders (UserID, ItemID, Quantity, Price, OrderDate)
+                SELECT c.UserID, c.ItemID, c.Quantity, i.Price, CURDATE()
+                FROM ecommerce.Cart c
+                JOIN Items i ON c.ItemID = i.ItemID
+                GROUP BY c.UserID;
+                '''
+                execute_query(sql)
                 
                 # Update the Order table with ItemID, Quantity, and Price
                 order_update_query = """
@@ -411,10 +416,31 @@ def orders():
 
         finally:
             connection.close()
-        
-        return 'Purchase Complete!', 200
-    
-    return render_template('orders.html', user=current_user.info, orders=get_order_history())
+            
+@app.route('/orders', methods=['GET','POST'])
+def orders():
+    return render_template('orders.html',  user=current_user.info)
+
+# renders /deposit.html in order for users to add money to their accounts
+@app.route('/deposit')
+def deposit():
+    return render_template('/deposit.html')
+
+# used so users can add funds to their account
+@app.route('/update_balance', methods=['GET', 'POST'])
+def update_balance():
+    amount = request.form['amount']
+    userID = current_user.info['UserID']
+    if request.method == 'POST':
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "UPDATE `ecommerceDB`.`Users` SET balance = balance + %s WHERE `UserID`=%s;"
+                cursor.execute(sql, (amount, userID))
+            connection.commit()
+        finally:
+            connection.close()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
