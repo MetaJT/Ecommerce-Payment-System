@@ -17,7 +17,8 @@ function signInUser(userId) {
     };
     xhr.send();
 }
-function confirmDelete() {
+function confirmDelete(event) {
+    event.preventDefault(); // Prevent the default form submission behavior
     if (confirm("Are you sure you want to delete your account?")) {
         deleteAccount();
     }
@@ -27,15 +28,21 @@ function deleteAccount() {
     xhr.open("POST", "/delete-account", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            alert("Your account has been deleted.");
-            window.location.href = "/home";
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                alert("Your account has been deleted.");
+                window.location.href = "/home";
+            } else {
+                alert("Failed to delete your account.");
+            }
         }
     };
     xhr.send();
 }
+
 function updateAccount(event) {
-    event.preventDefault();
+
+    event.preventDefault(); // Prevent the default form submission behavior
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -46,24 +53,25 @@ function updateAccount(event) {
         password: password,
         username: username
     };
-    fetch('/edit-account-details', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(accountInfo)
-    })
-    .then(response => {
-        if (response.ok) {
-            alert('User information updated successfully!');
-        } else {
-            alert('Failed to update user information.');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/edit-account-details", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function() {
+        console.log(xhr.status)
+        if (xhr.readyState == 4) {
+            console.log(xhr)
+            if (xhr.status == 200) {
+                console.log(xhr)
+                alert("User information updated successfully!");
+            } else {
+                alert("Failed to update user information.");
+            }
+            window.location.href = "/account/settings";
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to update user information.');
-    });
+    };
+    console.log(accountInfo);
+    xhr.send(JSON.stringify(accountInfo));
 }
 
 // Cart Management
@@ -95,7 +103,7 @@ function selectItem(itemId) {
             console.log(xhr.responseText);
             var response = JSON.parse(xhr.responseText);
             if (response) {
-                console.log(response.item.Size);
+                console.log(response.item);
                 document.getElementById('name').innerText = response.item.Name;
                 document.getElementById('quantity').innerText = response.item.Quantity;
                 document.getElementById('price').innerText = response.item.Price;
@@ -140,8 +148,9 @@ function checkout() {
     // Still need
     alert("Proceeding to checkout.");
 }
+
 function submit_purchase() {
-    fetch('/submit-purchase', {
+    fetch('/orders', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -149,15 +158,20 @@ function submit_purchase() {
     })
     .then(response => {
         if (response.ok) {
-            console.log("Purchase successful!");
+            alert("Purchase Complete!");
+            window.location.href = '/home';
         } else {
             console.error("Failed to complete purchase:", response.statusText);
+            alert("Failed to complete purchase. Please try again later.");
         }
     })
     .catch(error => {
         console.error("Error submitting purchase:", error);
+        // Show an error message to the user
+        alert("An error occurred while submitting the purchase. Please try again later.");
     });
 }
+
 
 // Button 
 document.addEventListener('DOMContentLoaded', function() {
@@ -173,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
             selectItem(button.id);
         })
     })
-
 });
 // Toggle button
 function toggleForm(formId) {

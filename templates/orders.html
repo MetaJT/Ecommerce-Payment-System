@@ -37,23 +37,25 @@
             <tr>
                 <th>Order ID</th>
                 <th>User ID</th>
-                <th>Item ID</th>
-                <th>Quantity</th>
-                <th>Price</th>
+                <th>Total Items</th>
+                <th>Total Price</th>
                 <th>Order Date</th>
+                <th>Order Status</th>
             </tr>
         </thead>
         <tbody>
+            {% if orders %}
             {% for order in orders %}
             <tr>
-                <td>{{ order[0] }}</td>
-                <td>{{ order[1] }}</td>
-                <td>{{ order[2] }}</td>
-                <td>{{ order[3] }}</td>
-                <td>{{ order[4] }}</td>
-                <td>{{ order[5] }}</td>
+                <td>{{ order['OrderID'] }}</td>
+                <td>{{ order['UserID'] }}</td>
+                <td>{{ order['TotalItems'] }}</td>
+                <td>${{ order['TotalAmount'] }}</td>
+                <td>{{ order['OrderDate'] }}</td>
+                <td>Pending</td>
             </tr>
             {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 </body>

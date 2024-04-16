@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.ShippingAddresses (
     State VARCHAR(100),
     PostalCode VARCHAR(20),
     Country VARCHAR(100),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 ''',
 '''
@@ -80,19 +80,30 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.PaymentMethods (
     CardNumber VARCHAR(100),
     ExpiryDate DATE,
     CVV VARCHAR(10),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 ''',
 '''
 CREATE TABLE IF NOT EXISTS ecommerceDB.Orders (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL,
-    ItemID INT NOT NULL,
-    Quantity INT NOT NULL,
-    Price DECIMAL(10, 2) NOT NULL,
-    OrderDate DATE NOT NULL,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
+    UserID INT,
+    OrderDate DATE,
+    TotalItems INT,
+    TotalAmount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    IsComplete BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
     );
+''',
+'''
+CREATE TABLE IF NOT EXISTS ecommerceDB.OrderItems (
+    OrderItemID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT,
+    ItemID INT,
+    Quantity INT,
+    Price DECIMAL(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
+);
 '''
 ]
+
