@@ -34,33 +34,6 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.Cart (
 );
 ''',
 '''
-CREATE TABLE IF NOT EXISTS ecommerceDB.Invoices (
-    InvoicesID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL, 
-    ClientName VARCHAR(255),
-    InvoiceDate DATE,
-    TotalAmount DECIMAL(10,2) NOT NULL DEFAULT 0.00
-);
-''',
-'''
-CREATE TABLE IF NOT EXISTS ecommerceDB.InvoiceItems (
-    ItemID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    InvoiceID INT NOT NULL,
-    ItemDescription VARCHAR(255) NOT NULL DEFAULT 'None.',
-    Quantity INT DEFAULT 0,
-    LineTotal DECIMAL(10,2) NOT NULL DEFAULT 0.00
-);
-''',
-'''
-CREATE TABLE IF NOT EXISTS ecommerceDB.Payments (
-    PaymentID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    InvoiceID INT NOT NULL,
-    PaymentDate DATE ,
-    Amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    PaymentMethod VARCHAR(255)
-);
-''',
-'''
 CREATE TABLE IF NOT EXISTS ecommerceDB.ShippingAddresses (
     AddressID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
@@ -69,30 +42,30 @@ CREATE TABLE IF NOT EXISTS ecommerceDB.ShippingAddresses (
     State VARCHAR(100),
     PostalCode VARCHAR(20),
     Country VARCHAR(100),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
-);
-''',
-'''
-CREATE TABLE IF NOT EXISTS ecommerceDB.PaymentMethods (
-    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT,
-    CardType VARCHAR(50),
-    CardNumber VARCHAR(100),
-    ExpiryDate DATE,
-    CVV VARCHAR(10),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 ''',
 '''
 CREATE TABLE IF NOT EXISTS ecommerceDB.Orders (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL,
-    ItemID INT NOT NULL,
-    Quantity INT NOT NULL,
-    Price DECIMAL(10, 2) NOT NULL,
-    OrderDate DATE NOT NULL,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
+    UserID INT,
+    OrderDate DATE,
+    TotalItems INT,
+    TotalAmount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    IsComplete BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
     );
+''',
+'''
+CREATE TABLE IF NOT EXISTS ecommerceDB.OrderItems (
+    OrderItemID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT,
+    ItemID INT,
+    Quantity INT,
+    Price DECIMAL(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID)
+);
 '''
 ]
+
