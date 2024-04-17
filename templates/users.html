@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
 </head>
+
 <body>
     <h1>DB665 DB Project</h1>
 
@@ -34,6 +36,7 @@
     </nav>
 
     <!-- Buy Menu -->
+
     {% if currUser %}
         <h1>Buy Menu</h1>
         <div>
@@ -54,8 +57,9 @@
             <button onclick="addToCart()">Add to Cart</button>
         </div>
     {% endif %}
+
     <!-- Users List -->
-    <h2>Users List</h2>
+    <h2>User Information List</h2>
     <table border="1">
         <tr>
             <th>UserID</th>
@@ -69,10 +73,15 @@
             <td>{{ user.UserID }}</td>
             <td>{{ user.FirstName }}</td>
             <td>{{ user.LastName }}</td>
-            <td>${{ user.Balance }}</td>
-            <td>{{ user.Address }}</td>
+            <td>{{ user.Balance }}</td>
+            <td>{{ user.Address if user.Address else "No Address" }}</td>
         </tr>
         {% endfor %}
     </table>
 </body>
+
+<footer>
+    <h2>By: Alexis Diaz & Jordan Trotter</h2>
+</footer>
+
 </html>

@@ -67,13 +67,31 @@ def execute_query(query, values=None):
 @app.route('/index')
 def index():
     create_tables('schema.py')
-    sql = """
-        SELECT Users.*, ShippingAddresses.Address 
-        FROM `ecommerceDB`.`Users`
-        LEFT JOIN `ecommerceDB`.`ShippingAddresses` 
-        ON Users.UserID = ShippingAddresses.UserID;
-    """
-    result = execute_query(sql)
+
+    query = """
+            SELECT
+                u.UserID,
+                u.FirstName,
+                u.LastName,
+                u.Balance,
+                s.Address
+            FROM
+                ecommerceDB.Users AS u
+            LEFT JOIN
+                ecommerceDB.ShippingAddresses AS s ON u.UserID = s.UserID;
+        """
+    conn = get_db_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            # Execute a query
+            cursor.execute(query)
+            # Fetch all the results
+            result = cursor.fetchall()
+            for row in result:
+                print(row)  # Each row is a dictionary
+    finally:
+        conn.close()
 
     if current_user.is_authenticated: 
         return render_template('users.html', users=result, currUser=current_user.info, items=get_items())
