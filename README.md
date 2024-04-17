@@ -5,6 +5,11 @@ _**Members:** Jordan Trotter & Alexis Diaz_
 
 _**Goal:** Develop a desktop/web/mobile application that uses relational databases._
 
+**Tech Stack:**
+- Backend: Flask
+- Database: AWS RDS
+- DB Software: MySQL
+
 ## Quick Start
 ```bash
 # Install dependencies
