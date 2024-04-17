@@ -67,7 +67,12 @@ def execute_query(query, values=None):
 @app.route('/index')
 def index():
     create_tables('schema.py')
-    sql = "SELECT * FROM `ecommerceDB`.`Users`;"
+    sql = """
+        SELECT Users.*, ShippingAddresses.Address 
+        FROM `ecommerceDB`.`Users`
+        LEFT JOIN `ecommerceDB`.`ShippingAddresses` 
+        ON Users.UserID = ShippingAddresses.UserID;
+    """
     result = execute_query(sql)
 
     if current_user.is_authenticated: 
@@ -394,7 +399,7 @@ def orders():
                 sql = '''
                 INSERT INTO ecommerceDB.Orders (UserID, ItemID, Quantity, Price, OrderDate)
                 SELECT c.UserID, c.ItemID, c.Quantity, i.Price, CURDATE()
-                FROM ecommerce.Cart c
+                FROM ecommerceDB.Cart c
                 JOIN Items i ON c.ItemID = i.ItemID
                 GROUP BY c.UserID;
                 '''
@@ -413,9 +418,11 @@ def orders():
                 cursor.execute(cart_delete_query, (user_id,))
 
                 connection.commit()
+                return "Purchase complete!", 200
 
         finally:
             connection.close()
+    return render_template('/orders.html', user=current_user.info, orders=get_order_history())
 
 # renders /deposit.html in order for users to add money to their accounts
 @app.route('/deposit')

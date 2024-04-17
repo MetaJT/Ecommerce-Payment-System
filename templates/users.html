@@ -34,25 +34,26 @@
     </nav>
 
     <!-- Buy Menu -->
-    <h1>Buy Menu</h1>
-    <div>
-        <span>
-            <a href="/add_item">Add Items</a>
-            {% for item in items %}
-            <button type="button" class="item-button" id="{{ item.ItemID }}">{{ item.Name }}</button>
-            {% endfor %}        
-        </span>
-    </div>
-    <div>
-        <h3>Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
-        <p>Price: $<span class="item-price" id="price">{{ price }}</span></p>
-        <span class="item-id" id="id"></span>
-        <p>Size: <span class="item-size" id="size"></span></p>
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" min="1" value="1">
-        <button onclick="addToCart()">Add to Cart</button>
-    </div>
-
+    {% if currUser %}
+        <h1>Buy Menu</h1>
+        <div>
+            <span>
+                <a href="/add_item">Add Items</a>
+                {% for item in items %}
+                <button type="button" class="item-button" id="{{ item.ItemID }}">{{ item.Name }}</button>
+                {% endfor %}        
+            </span>
+        </div>
+        <div>
+            <h3>Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
+            <p>Price: $<span class="item-price" id="price">{{ price }}</span></p>
+            <span class="item-id" id="id"></span>
+            <p>Size: <span class="item-size" id="size"></span></p>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" min="1" value="1">
+            <button onclick="addToCart()">Add to Cart</button>
+        </div>
+    {% endif %}
     <!-- Users List -->
     <h2>Users List</h2>
     <table border="1">
@@ -68,7 +69,7 @@
             <td>{{ user.UserID }}</td>
             <td>{{ user.FirstName }}</td>
             <td>{{ user.LastName }}</td>
-            <td>{{ user.Balance }}</td>
+            <td>${{ user.Balance }}</td>
             <td>{{ user.Address }}</td>
         </tr>
         {% endfor %}
