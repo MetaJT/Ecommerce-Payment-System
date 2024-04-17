@@ -397,8 +397,8 @@ def orders():
                     total_price += item['Quantity'] * item['Price']
                     cursor.execute(order_items_insert_query, (order_id, item['ItemID'], item['Quantity'], item['Price']))
                 sql = '''
-                INSERT INTO ecommerceDB.Orders (UserID, ItemID, Quantity, Price, OrderDate)
-                SELECT c.UserID, c.ItemID, c.Quantity, i.Price, CURDATE()
+                INSERT INTO ecommerceDB.Orders (UserID, TotalItems, TotalAmount, OrderDate)
+                SELECT c.UserID, c.Quantity AS TotalItems, i.Price AS TotalAmount, CURDATE()
                 FROM ecommerceDB.Cart c
                 JOIN Items i ON c.ItemID = i.ItemID
                 GROUP BY c.UserID;
