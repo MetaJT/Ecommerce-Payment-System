@@ -24,17 +24,16 @@ function confirmDelete(event) {
     }
 }
 function deleteAccount() {
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/delete-account", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                alert("Your account has been deleted.");
-                window.location.href = "/home";
-            } else {
-                alert("Failed to delete your account.");
-            }
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            alert("Your account has been deleted.");
+            window.location.href = "/home";
+        } else {
+            alert("Failed to delete your account.");
         }
     };
     xhr.send();
