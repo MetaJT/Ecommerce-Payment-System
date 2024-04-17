@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='loginscript.js') }}"></script>
 </head>
+
 <body>
     <h1>DB665 DB Project</h1>
 
@@ -15,7 +17,7 @@
         <ul>
             <li><a href="#">Home</a></li>
             <li><a href="about">About Us</a></li>
-            <li><a href="deposit">Deposit</li>
+            <li><a href="deposit">Deposit</a></li>
             {% if not currUser %}
             <li class="user"><a href="/create_account">Create Account</a></li>
             <li class="user"><a href="/login">Login</a></li>
@@ -37,24 +39,24 @@
     <h1>Buy Menu</h1>
     <div>
         <span>
-            <a href="/add_item">Add Items</a>
             {% for item in items %}
             <button type="button" class="item-button" id="{{ item.ItemID }}">{{ item.Name }}</button>
-            {% endfor %}        
+            {% endfor %}
+            <a class="smaller-text" href="/add_item">Add Items</a>
         </span>
     </div>
     <div>
-        <h3>Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
-        <p>Price: $<span class="item-price" id="price">{{ price }}</span></p>
+        <h3>Selected Item: <span class="item-selected" id="name"></span>{{ name }}</h3>
+        <p class="smaller-text">Price: $<span class="item-price" id="price">{{ price }}</span></p>
         <span class="item-id" id="id"></span>
-        <p>Size: <span class="item-size" id="size"></span></p>
-        <label for="quantity">Quantity:</label>
+        <p class="smaller-text">Size: <span class="item-size" id="size"></span></p>
+        <label class="smaller-text" for="quantity">Quantity:</label>
         <input type="number" id="quantity" min="1" value="1">
         <button onclick="addToCart()">Add to Cart</button>
     </div>
 
     <!-- Users List -->
-    <h2>Users List</h2>
+    <h2>User Information List</h2>
     <table border="1">
         <tr>
             <th>UserID</th>
@@ -69,9 +71,14 @@
             <td>{{ user.FirstName }}</td>
             <td>{{ user.LastName }}</td>
             <td>{{ user.Balance }}</td>
-            <td>{{ user.Address }}</td>
+            <td>{{ user.Address if user.Address else "No Address" }}</td>
         </tr>
         {% endfor %}
     </table>
 </body>
+
+<footer>
+    <h2>By: Alexis Diaz & Jordan Trotter</h2>
+</footer>
+
 </html>

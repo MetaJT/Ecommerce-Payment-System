@@ -3,6 +3,25 @@ body {background-color: rgb(185, 234, 237);}
 h1 {
     font-size: 50px;
     text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+h2, h3, h4 {
+    font-size: 30px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+h3 {
+    font-size: 20px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+h4 {
+    font-size: 15px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
 }
 
 .navbar ul{
@@ -11,6 +30,7 @@ h1 {
     padding: 0px;
     margin: 0px;
     text-align: left;
+    font-family: 'Courier New', Courier, monospace;
 }
 .navbar ul li{
     display: inline-block;
@@ -49,10 +69,6 @@ h1 {
 }
 
 
-h2 {
-    font-size: 30px;
-    text-align: center;
-}
 
 button{
     background-color: #4CAF50; /* Green background */
@@ -81,7 +97,7 @@ input {
 }
 
 
-  table {
+table {
     width: 100%; /* Makes the table stretch to the width of its container */
     border-collapse: collapse; /* Collapses the border to appear as single line */
 }
@@ -97,4 +113,22 @@ th, td {
 
 td {
     font-size: 20px; /* Increases font size inside td */
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0; 
+    margin: 0 auto;   
+    width: 100%;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.smaller-text {
+    font-size: 20px;
+    text-align: center;
 }
